@@ -1,0 +1,14 @@
+{
+    "name": "QuicksaveSQLite3 - Testing",
+    "tree": {
+        "$className": "DataModel",
+
+        "ServerStorage": {
+            "$className": "ServerStorage",
+
+            "BackupLayer": {
+                "$path": "."
+            }
+        }
+    }
+}
