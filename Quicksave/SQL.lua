@@ -5,7 +5,11 @@ local SQL = {
     API_TOKEN = "",
 }
 
-local function requestAsync(method, params, body)
+local function requestAsync(method, params, requestBody)
+    if SQL.API_TOKEN == "" then
+        error("Please configure an API Token", 3)
+    end
+
     local request = {
         Url = SQL.URL.. params,
         Method = method,
@@ -13,95 +17,64 @@ local function requestAsync(method, params, body)
             apitoken = SQL.API_TOKEN,
         },
     }
-    if body then
-        request.Body = HttpService:JSONEncode(body)
+    if requestBody then
+        request.Body = HttpService:JSONEncode(requestBody)
         request.Headers["content-type"] = "application/json"
     end
 
-    return HttpService:JSONDecode(HttpService:RequestAsync(request).Body)
+    local responseBody = HttpService:JSONDecode(HttpService:RequestAsync(request).Body)
+    if responseBody.Success then
+        return responseBody
+    else
+        error(responseBody.Message, 3)
+    end
 end
 
 function SQL.getCollectionNames()
-    local response = requestAsync(
+    return requestAsync(
         "GET",
         "/collections"
-    )
-
-    if response.Success then
-        return response.Names
-    else
-        error(response.Message, 2)
-    end
+    ).Names
 end
 
 function SQL.getDocumentNames(collectionName)
-    local response = requestAsync(
+    return requestAsync(
         "GET",
         "/collections/".. collectionName
-    )
-
-    if response.Success then
-        return response.Names
-    else
-        error(response.Message, 2)
-    end
+    ).Names
 end
 
 function SQL.postDocuments(documents)
-    local response = requestAsync(
+    return requestAsync(
         "POST",
         "/postBatch",
         documents
     )
-
-    if response.Success then
-        return response
-    else
-        error(response.Message, 2)
-    end
 end
 
 function SQL.postDocument(collectionName, documentName, data)
-    local response = requestAsync(
+    return requestAsync(
         "POST",
         ("/collections/%s/%s"):format(collectionName, documentName),
         {
             Data = data,
         }
     )
-
-    if response.Success then
-        return response
-    else
-        error(response.Message, 2)
-    end
 end
 
 function SQL.getDocuments(documentNames)
-    local response = requestAsync(
+    return requestAsync(
         "POST",
         "/getBatch",
         documentNames
-    )
-
-    if response.Success then
-        return response.Collections
-    else
-        error(response.Message, 2)
-    end
+    ).Collections
 end
 
 function SQL.getDocument(collectionName, documentName)
-    local response = requestAsync(
+    return requestAsync(
         "GET",
         ("/collections/%s/%s"):format(collectionName, documentName)
-    )
-
-    if response.Success then
-        return response.Document
-    else
-        error(response.Message, 2)
-    end
+    ).Document
 end
 
 return SQL
