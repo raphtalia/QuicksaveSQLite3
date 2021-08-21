@@ -313,6 +313,4 @@ app.get("/download", function(req, res) {
   }
 });
 
-var list = app.listen(process.env.PORT, function() {
-  console.log("Server Online, Port " + list.address().port);
-});
+app.listen(process.env.PORT);
